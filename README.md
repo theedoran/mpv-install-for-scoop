@@ -4,7 +4,7 @@
 This script sets up file associations for [mpv][1] on Windows.
 
 Slightly reorganized version of ``mpv-install`` by [James Ross-Gowan](https://github.com/rossy/mpv-install)
-to use it via [scoop](scoop.sh).
+to use it via [scoop](https://scoop.sh).
 
 How to install
 --------------
