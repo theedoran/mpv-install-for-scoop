@@ -1,10 +1,21 @@
 @echo off
 setlocal enableextensions enabledelayedexpansion
-path %SystemRoot%\System32;%SystemRoot%;%SystemRoot%\System32\Wbem
+path %SystemRoot%\System32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SystemRoot%\System32\WindowsPowerShell\v1.0\
 
 :: Unattended install flag. When set, the script will not require user input.
 set unattended=no
-if "%1"=="/u" set unattended=yes
+if "%1"=="/u" (
+	set unattended=yes
+	shift /1
+)
+if "%~1"=="" (
+	echo You should provide a path to mpv.exe
+	call :die
+)
+if "%~2"=="" (
+	echo You should provide a path to mpv-icon.ico
+	call :die
+)
 
 :: Make sure this is Windows Vista or later
 call :ensure_vista
@@ -16,12 +27,12 @@ call :ensure_admin
 set mpv_args=
 
 :: Get mpv.exe location
-set mpv_path=%~dp0mpv.exe
+set mpv_path=%~1\mpv.exe
 if not exist "%mpv_path%" call :die "mpv.exe not found"
 
-:: Get mpv-document.ico location
-set icon_path=%~dp0mpv-document.ico
-if not exist "%icon_path%" call :die "mpv-document.ico not found"
+:: Get mpv-icon.ico location
+set icon_path=%~2\mpv-icon.ico
+if not exist "%icon_path%" call :die "mpv-icon.ico not found"
 
 :: Register mpv.exe under the "App Paths" key, so it can be found by
 :: ShellExecute, the run command, the start menu, etc.
@@ -172,6 +183,9 @@ call :add_type ""                                 "audio" "CUE Sheet"           
 
 :: Register "Default Programs" entry
 call :reg add "HKLM\SOFTWARE\RegisteredApplications" /v "mpv" /d "SOFTWARE\Clients\Media\mpv\Capabilities" /f
+
+:: Add start menu link
+powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%ProgramData%\Microsoft\Windows\Start Menu\Programs\mpv.lnk');$s.TargetPath='%mpv_path%';$s.Save()"
 
 echo.
 echo Installed successfully^^! You can now configure mpv's file associations in the
